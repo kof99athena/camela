@@ -1,13 +1,9 @@
 package com.anehta.camela
 
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.fragment.app.commit
 import com.anehta.camela.databinding.ActivityMainBinding
-import com.anehta.camela.feature.preview.PreviewFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -18,5 +14,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        )
     }
 }
