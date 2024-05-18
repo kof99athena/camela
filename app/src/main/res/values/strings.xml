@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">camela</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!--  camera permission  -->
+    <string name="granted">You can use your camera</string>
+
 </resources>
