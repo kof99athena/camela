@@ -33,9 +33,25 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
+    val fragment_version = "1.7.0"
+    val camerax_version = "1.4.0-alpha05"
+
+    // Kotlin - Fragment
+    implementation("androidx.fragment:fragment-ktx:$fragment_version")
+
+    //camera
+    implementation("androidx.camera:camera-core:${camerax_version}")
+    implementation("androidx.camera:camera-camera2:${camerax_version}")
+    implementation("androidx.camera:camera-lifecycle:${camerax_version}")
+    implementation("androidx.camera:camera-video:${camerax_version}")
+    implementation("androidx.camera:camera-view:${camerax_version}")
+    implementation("androidx.camera:camera-extensions:${camerax_version}")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
