@@ -2,6 +2,7 @@
     <string name="app_name">camela</string>
 
     <!--  camera permission  -->
-    <string name="granted">You can use your camera</string>
+    <string name="granted">You can use your camera.</string>
+    <string name="permission_denied">Camera permission denied.</string>
 
 </resources>
