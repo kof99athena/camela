@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -41,9 +43,14 @@ android {
 dependencies {
     val fragment_version = "1.7.0"
     val camerax_version = "1.4.0-alpha05"
+    val hilt_version = "2.44"
 
     // Kotlin - Fragment
     implementation("androidx.fragment:fragment-ktx:$fragment_version")
+
+    //hilt
+    implementation("com.google.dagger:hilt-android:${hilt_version}")
+    kapt("com.google.dagger:hilt-android-compiler:${hilt_version}")
 
     //camera
     implementation("androidx.camera:camera-core:${camerax_version}")
@@ -61,4 +68,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+}
+
+kapt {
+    correctErrorTypes = true
 }
