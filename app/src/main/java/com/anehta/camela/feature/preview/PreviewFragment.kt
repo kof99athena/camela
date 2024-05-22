@@ -16,6 +16,7 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import com.anehta.camela.R
 import com.anehta.camela.databinding.FragmentPreviewBinding
 import com.anehta.camela.feature.preview.viewmodel.PreviewViewModel
@@ -42,24 +43,32 @@ class PreviewFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentPreviewBinding.inflate(inflater, container, false)
-
-        // Request camera permissions
-        if (allPermissionsGranted()) {
-            Toast.makeText(context, R.string.granted, Toast.LENGTH_SHORT).show()
-        } else {
-            requestPermissions(REQUIRED_PERMISSIONS, CAMERA_PERMISSION_REQUEST_CODE)
-        }
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        viewModel.permissionGranted.observe(viewLifecycleOwner, Observer { isGranted ->
+            if (isGranted == true) {
+                Toast.makeText(context, R.string.granted, Toast.LENGTH_SHORT).show()
+                startCamera()
+            } else {
+                requestPermissions(REQUIRED_PERMISSIONS, CAMERA_PERMISSION_REQUEST_CODE)
+            }
+        })
+
+        if (allPermissionsGranted()) {
+            viewModel.setPermissionGranted(true)
+        } else {
+            viewModel.setPermissionGranted(false)
+        }
+
         // add surfaceView holder
         surfaceHolder = binding.surface.holder
         surfaceHolder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
-                startCamera()
+                if (viewModel.permissionGranted.value == true) startCamera()
             }
 
             override fun surfaceChanged(
@@ -116,14 +125,13 @@ class PreviewFragment : Fragment() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
             if ((grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED })) {
-                Toast.makeText(context, R.string.granted, Toast.LENGTH_SHORT).show()
-                // 권한이 허용된 경우, 카메라 사용 로직을 호출
+                viewModel.setPermissionGranted(true)
             } else {
-                Toast.makeText(context, R.string.permission_denied, Toast.LENGTH_SHORT).show()
-                // 권한이 거부된 경우, 사용자에게 알림
+                viewModel.setPermissionGranted(false)
             }
         }
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
