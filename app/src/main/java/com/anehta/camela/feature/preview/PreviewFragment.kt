@@ -20,7 +20,9 @@ import androidx.lifecycle.Observer
 import com.anehta.camela.R
 import com.anehta.camela.databinding.FragmentPreviewBinding
 import com.anehta.camela.feature.preview.viewmodel.PreviewViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class PreviewFragment : Fragment() {
 
     private var _binding: FragmentPreviewBinding? = null

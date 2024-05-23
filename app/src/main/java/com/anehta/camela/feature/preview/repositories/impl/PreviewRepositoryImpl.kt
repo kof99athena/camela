@@ -1,16 +1,15 @@
-package com.anehta.camela.feature.preview.viewmodel
+package com.anehta.camela.feature.preview.repositories.impl
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
+import com.anehta.camela.feature.preview.repositories.PreviewRepository
 
-class PreviewViewModel : ViewModel() {
+class PreviewRepositoryImpl : PreviewRepository {
     private val _permissionGranted = MutableLiveData<Boolean>()
     //custom getter : read only _permissionGranted
     val permissionGranted: LiveData<Boolean> get() = _permissionGranted
 
-    fun setPermissionGranted(isGranted: Boolean){
+    override fun setPermissionGranted(isGranted: Boolean) {
         _permissionGranted.value = isGranted
     }
 }
