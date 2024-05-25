@@ -20,7 +20,9 @@ import androidx.lifecycle.Observer
 import com.anehta.camela.R
 import com.anehta.camela.databinding.FragmentPreviewBinding
 import com.anehta.camela.feature.preview.viewmodel.PreviewViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class PreviewFragment : Fragment() {
 
     private var _binding: FragmentPreviewBinding? = null
@@ -43,14 +45,17 @@ class PreviewFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentPreviewBinding.inflate(inflater, container, false)
+        Log.d("CAMERA ACCESS", "onCreateView")
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.permissionGranted.observe(viewLifecycleOwner, Observer { isGranted ->
-            if (isGranted == true) {
+        Log.d("CAMERA ACCESS", "onViewCreated")
+
+        viewModel.requestModel.observe(viewLifecycleOwner, Observer { requsetModel ->
+            if (requsetModel.isGranted) {
                 Toast.makeText(context, R.string.granted, Toast.LENGTH_SHORT).show()
                 startCamera()
             } else {
@@ -58,17 +63,22 @@ class PreviewFragment : Fragment() {
             }
         })
 
+        Log.d("CAMERA ACCESS", "permission Granted")
+
+        // Check permissions and set initial status
         if (allPermissionsGranted()) {
-            viewModel.setPermissionGranted(true)
+            viewModel.setPermissionStatus(isGranted = true)
         } else {
-            viewModel.setPermissionGranted(false)
+            requestPermissions(REQUIRED_PERMISSIONS, CAMERA_PERMISSION_REQUEST_CODE)
         }
+
 
         // add surfaceView holder
         surfaceHolder = binding.surface.holder
         surfaceHolder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
-                if (viewModel.permissionGranted.value == true) startCamera()
+                if (viewModel.requestModel.value?.isGranted == true) startCamera()
+                Log.d("CAMERA ACCESS", "surfaceCreated")
             }
 
             override fun surfaceChanged(
@@ -77,9 +87,11 @@ class PreviewFragment : Fragment() {
                 width: Int,
                 height: Int
             ) {
+                Log.d("CAMERA ACCESS", "surfaceChanged")
             }
 
             override fun surfaceDestroyed(holder: SurfaceHolder) {
+                Log.d("CAMERA ACCESS", "surfaceDestroyed")
             }
         })
     }
@@ -111,6 +123,7 @@ class PreviewFragment : Fragment() {
             }
 
         }, ContextCompat.getMainExecutor(requireContext()))
+        Log.d("CAMERA ACCESS", "startCamera()")
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
@@ -125,9 +138,9 @@ class PreviewFragment : Fragment() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
             if ((grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED })) {
-                viewModel.setPermissionGranted(true)
+                viewModel.setPermissionStatus(isGranted = true)
             } else {
-                viewModel.setPermissionGranted(false)
+                viewModel.setPermissionStatus(isGranted = false)
             }
         }
     }
