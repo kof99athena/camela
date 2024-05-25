@@ -1,15 +1,17 @@
 package com.anehta.camela.feature.preview.repositories.impl
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.anehta.camela.feature.preview.repositories.PreviewRepository
+import com.anehta.camela.models.requests.RequestModel
+import javax.inject.Inject
 
-class PreviewRepositoryImpl : PreviewRepository {
-    private val _permissionGranted = MutableLiveData<Boolean>()
-    //custom getter : read only _permissionGranted
-    val permissionGranted: LiveData<Boolean> get() = _permissionGranted
+class PreviewRepositoryImpl @Inject constructor() : PreviewRepository {
+    private var permissionGranted: Boolean = false
 
-    override fun setPermissionGranted(isGranted: Boolean) {
-        _permissionGranted.value = isGranted
+    override fun getPermissionStatus(): RequestModel {
+        return RequestModel(permissionGranted)
+    }
+
+    override fun setPermissionStatus(requestModel: RequestModel) {
+        permissionGranted = requestModel.isGranted
     }
 }

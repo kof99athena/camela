@@ -43,7 +43,7 @@ android {
 dependencies {
     val fragment_version = "1.7.0"
     val camerax_version = "1.4.0-alpha05"
-    val hilt_version = "2.44"
+    val hilt_version = "2.50"
 
     // Kotlin - Fragment
     implementation("androidx.fragment:fragment-ktx:$fragment_version")
@@ -51,6 +51,8 @@ dependencies {
     //hilt
     implementation("com.google.dagger:hilt-android:${hilt_version}")
     kapt("com.google.dagger:hilt-android-compiler:${hilt_version}")
+    //implementation("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
+    kapt("androidx.hilt:hilt-compiler:1.2.0")
 
     //camera
     implementation("androidx.camera:camera-core:${camerax_version}")
