@@ -44,6 +44,10 @@ dependencies {
     val fragment_version = "1.7.0"
     val camerax_version = "1.4.0-alpha05"
     val hilt_version = "2.50"
+    val jUnit_version = "4.13.2"
+    val androidXTest_version = "1.5.0"
+    val mockito_version = "5.12.0"
+    val mockitoKotlin_version = "3.2.0"
 
     // Kotlin - Fragment
     implementation("androidx.fragment:fragment-ktx:$fragment_version")
@@ -53,6 +57,19 @@ dependencies {
     kapt("com.google.dagger:hilt-android-compiler:${hilt_version}")
     //implementation("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
     kapt("androidx.hilt:hilt-compiler:1.2.0")
+
+    //Junit
+    // Required -- JUnit 4 framework
+    testImplementation("junit:junit:$jUnit_version")
+    // Optional -- Robolectric environment
+    testImplementation("androidx.test:core:$androidXTest_version")
+    // Optional -- Mockito framework
+    testImplementation("org.mockito:mockito-core:$mockito_version")
+    // Optional -- mockito-kotlin
+    testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlin_version")
+    // Optional -- Mockk framework
+    testImplementation("io.mockk:mockk:$mockito_version")
+
 
     //camera
     implementation("androidx.camera:camera-core:${camerax_version}")
