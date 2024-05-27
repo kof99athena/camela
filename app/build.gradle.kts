@@ -44,10 +44,13 @@ dependencies {
     val fragment_version = "1.7.0"
     val camerax_version = "1.4.0-alpha05"
     val hilt_version = "2.50"
+
     val jUnit_version = "4.13.2"
     val androidXTest_version = "1.5.0"
     val mockito_version = "5.12.0"
     val mockitoKotlin_version = "3.2.0"
+    val arch_verison = "2.2.0"
+    val kotlinxCoroutines_version = "1.8.1"
 
     // Kotlin - Fragment
     implementation("androidx.fragment:fragment-ktx:$fragment_version")
@@ -69,7 +72,10 @@ dependencies {
     testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlin_version")
     // Optional -- Mockk framework
     testImplementation("io.mockk:mockk:$mockito_version")
-
+    //InstantTaskExecutorRule
+    testImplementation("androidx.arch.core:core-testing:${arch_verison}")
+    //koltinx
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${kotlinxCoroutines_version}'")
 
     //camera
     implementation("androidx.camera:camera-core:${camerax_version}")
