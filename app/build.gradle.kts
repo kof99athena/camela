@@ -47,8 +47,9 @@ dependencies {
 
     val jUnit_version = "4.13.2"
     val androidXTest_version = "1.5.0"
-    val mockito_version = "5.12.0"
+    val mockitoCore_version = "5.12.0"
     val mockitoKotlin_version = "3.2.0"
+    val mockito_version = "1.13.2"
     val arch_verison = "2.2.0"
     val kotlinxCoroutines_version = "1.8.1"
 
@@ -67,7 +68,7 @@ dependencies {
     // Optional -- Robolectric environment
     testImplementation("androidx.test:core:$androidXTest_version")
     // Optional -- Mockito framework
-    testImplementation("org.mockito:mockito-core:$mockito_version")
+    testImplementation("org.mockito:mockito-core:$mockitoCore_version")
     // Optional -- mockito-kotlin
     testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlin_version")
     // Optional -- Mockk framework
@@ -76,6 +77,7 @@ dependencies {
     testImplementation("androidx.arch.core:core-testing:${arch_verison}")
     //koltinx
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${kotlinxCoroutines_version}'")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${kotlinxCoroutines_version}")
 
     //camera
     implementation("androidx.camera:camera-core:${camerax_version}")
