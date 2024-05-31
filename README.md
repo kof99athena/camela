@@ -1,14 +1,14 @@
 # What is "Camela" ?
-- Camera preview, 게임 등 초당 프레임이 순식간에 바뀌는 처리는 어떻게 해야하지? 고민하다가 만든 앱
-- 카메라와 소통 중 📸
-
-# Goal
-- 더블 버퍼링 기법: UI 스레드 작업 시 버벅거림, 이미지 찢어짐, ANR 등을 해결한다.
-- 커스텀 카메라를 만든다.
-
+- 사용자의 편의에 맞춘 카메라 앱입니다.
+  
 # Component
 - Camera
 - SurfaceView
+- Databinding
+- Hilt
+
+# Clean Architecture
+![Clean Architecture](https://github.com/kof99athena/camela/assets/128768118/e7a4cb79-f9bc-4c37-98f5-116b4ef952f5)
 
 # View 
 ![1  View Structure of Camela](https://github.com/kof99athena/camela/assets/128768118/ff426c12-9936-45c3-9c81-805c9b691e10)
