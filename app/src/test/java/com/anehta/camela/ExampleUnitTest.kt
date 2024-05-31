@@ -1,10 +1,7 @@
 package com.anehta.camela
 
-import android.database.Observable
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.camera.core.impl.Observable.Observer
 import com.anehta.camela.feature.preview.interactors.PreviewInteractor
-import com.anehta.camela.feature.preview.repositories.PreviewRepository
 import com.anehta.camela.feature.preview.viewmodel.PreviewViewModel
 import com.anehta.camela.models.requests.RequestModel
 import kotlinx.coroutines.test.TestCoroutineDispatcher
