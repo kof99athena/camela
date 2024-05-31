@@ -54,7 +54,7 @@ class PreviewFragment : Fragment() {
 
         Log.d("CAMERA ACCESS", "onViewCreated")
 
-        viewModel.requestModel.observe(viewLifecycleOwner, Observer { requsetModel ->
+        viewModel.permissionRequest.observe(viewLifecycleOwner, Observer { requsetModel ->
             if (requsetModel.isGranted) {
                 Toast.makeText(context, R.string.granted, Toast.LENGTH_SHORT).show()
                 startCamera()
@@ -77,7 +77,7 @@ class PreviewFragment : Fragment() {
         surfaceHolder = binding.surface.holder
         surfaceHolder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
-                if (viewModel.requestModel.value?.isGranted == true) startCamera()
+                if (viewModel.permissionRequest.value?.isGranted == true) startCamera()
                 Log.d("CAMERA ACCESS", "surfaceCreated")
             }
 

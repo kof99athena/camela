@@ -1,5 +1,5 @@
 package com.anehta.camela.models.requests
 
-data class RequestModel(
+data class PermissionRequest(
     val isGranted: Boolean
 )

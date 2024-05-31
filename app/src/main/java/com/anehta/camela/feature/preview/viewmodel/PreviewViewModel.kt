@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.anehta.camela.feature.preview.interactors.PreviewInteractor
-import com.anehta.camela.models.requests.RequestModel
+import com.anehta.camela.models.requests.PermissionRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -12,20 +12,20 @@ import javax.inject.Inject
 class PreviewViewModel @Inject constructor(private val interactor: PreviewInteractor) :
     ViewModel() {
 
-    private val _requestModel = MutableLiveData<RequestModel>()
-    val requestModel: LiveData<RequestModel>
-        get() = _requestModel
+    private val _permission_request = MutableLiveData<PermissionRequest>()
+    val permissionRequest: LiveData<PermissionRequest>
+        get() = _permission_request
 
     init {
-        _requestModel.value = RequestModel(false)
+        _permission_request.value = PermissionRequest(false)
     }
 
     fun getPermissionStatus() {
         val permissionStatus = interactor.getPermissionStatus()
-        _requestModel.value = permissionStatus
+        _permission_request.value = permissionStatus
     }
 
     fun setPermissionStatus(isGranted: Boolean) {
-        _requestModel.value = RequestModel(isGranted)
+        _permission_request.value = PermissionRequest(isGranted)
     }
 }
