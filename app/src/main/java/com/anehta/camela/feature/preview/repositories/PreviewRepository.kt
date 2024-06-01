@@ -1,8 +1,8 @@
 package com.anehta.camela.feature.preview.repositories
 
-import com.anehta.camela.models.requests.RequestModel
+import com.anehta.camela.models.requests.PermissionRequest
 
 interface PreviewRepository {
-    fun getPermissionStatus(): RequestModel
-    fun setPermissionStatus(requestModel: RequestModel)
+    fun getPermissionStatus(): PermissionRequest
+    fun setPermissionStatus(permissionRequest: PermissionRequest)
 }
