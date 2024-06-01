@@ -11,6 +11,7 @@ import android.view.SurfaceHolder
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -40,19 +41,31 @@ class PreviewFragment : Fragment() {
         }
     }.toTypedArray()
 
+    private val requestPermission = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        var allGranted = true
+        permissions.entries.forEach {
+            Log.d("PERMISSION DEBUG", "${it.key} = ${it.value}")
+            if (!it.value) {
+                allGranted = false
+            }
+        }
+        viewModel.setPermissionStatus(allGranted)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentPreviewBinding.inflate(inflater, container, false)
-        Log.d("CAMERA ACCESS", "onCreateView")
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        Log.d("CAMERA ACCESS", "onViewCreated")
+        requestPermission.launch(REQUIRED_PERMISSIONS)
 
         viewModel.permissionRequest.observe(viewLifecycleOwner, Observer { requsetModel ->
             if (requsetModel.isGranted) {
@@ -63,17 +76,12 @@ class PreviewFragment : Fragment() {
             }
         })
 
-        Log.d("CAMERA ACCESS", "permission Granted")
-
-        // Check permissions and set initial status
         if (allPermissionsGranted()) {
             viewModel.setPermissionStatus(isGranted = true)
         } else {
             requestPermissions(REQUIRED_PERMISSIONS, CAMERA_PERMISSION_REQUEST_CODE)
         }
 
-
-        // add surfaceView holder
         surfaceHolder = binding.surface.holder
         surfaceHolder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
@@ -130,19 +138,6 @@ class PreviewFragment : Fragment() {
         context?.let { ctx ->
             ContextCompat.checkSelfPermission(ctx, it)
         } == PackageManager.PERMISSION_GRANTED
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
-            if ((grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED })) {
-                viewModel.setPermissionStatus(isGranted = true)
-            } else {
-                viewModel.setPermissionStatus(isGranted = false)
-            }
-        }
     }
 
     override fun onDestroyView() {
