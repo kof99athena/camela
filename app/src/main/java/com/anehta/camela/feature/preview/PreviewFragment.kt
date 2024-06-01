@@ -1,7 +1,6 @@
 package com.anehta.camela.feature.preview
 
 import android.Manifest
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -11,12 +10,12 @@ import android.view.SurfaceHolder
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import com.anehta.camela.R
 import com.anehta.camela.databinding.FragmentPreviewBinding
 import com.anehta.camela.feature.preview.viewmodel.PreviewViewModel
@@ -30,8 +29,8 @@ class PreviewFragment : Fragment() {
     private val viewModel by activityViewModels<PreviewViewModel>()
     private lateinit var surfaceHolder: SurfaceHolder
 
-    private val CAMERA_PERMISSION_REQUEST_CODE = 10
-    private val REQUIRED_PERMISSIONS = mutableListOf(
+    //private val CAMERA_PERMISSION_REQUEST_CODE = 10
+    private val requiredPermission = mutableListOf(
         Manifest.permission.CAMERA,
         Manifest.permission.RECORD_AUDIO
     ).apply {
@@ -40,40 +39,34 @@ class PreviewFragment : Fragment() {
         }
     }.toTypedArray()
 
+    private val requestPermission = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.values.all { it }
+        viewModel.setPermissionStatus(allGranted)
+        Log.d("PERMISSION DEBUG", "${permissions.keys} = ${permissions.values}")
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentPreviewBinding.inflate(inflater, container, false)
-        Log.d("CAMERA ACCESS", "onCreateView")
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        Log.d("CAMERA ACCESS", "onViewCreated")
-
-        viewModel.permissionRequest.observe(viewLifecycleOwner, Observer { requsetModel ->
+        viewModel.permissionRequest.observe(viewLifecycleOwner) { requsetModel ->
             if (requsetModel.isGranted) {
                 Toast.makeText(context, R.string.granted, Toast.LENGTH_SHORT).show()
                 startCamera()
             } else {
-                requestPermissions(REQUIRED_PERMISSIONS, CAMERA_PERMISSION_REQUEST_CODE)
+                requestPermission.launch(requiredPermission)
             }
-        })
-
-        Log.d("CAMERA ACCESS", "permission Granted")
-
-        // Check permissions and set initial status
-        if (allPermissionsGranted()) {
-            viewModel.setPermissionStatus(isGranted = true)
-        } else {
-            requestPermissions(REQUIRED_PERMISSIONS, CAMERA_PERMISSION_REQUEST_CODE)
         }
 
-
-        // add surfaceView holder
         surfaceHolder = binding.surface.holder
         surfaceHolder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
@@ -124,25 +117,6 @@ class PreviewFragment : Fragment() {
 
         }, ContextCompat.getMainExecutor(requireContext()))
         Log.d("CAMERA ACCESS", "startCamera()")
-    }
-
-    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-        context?.let { ctx ->
-            ContextCompat.checkSelfPermission(ctx, it)
-        } == PackageManager.PERMISSION_GRANTED
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
-            if ((grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED })) {
-                viewModel.setPermissionStatus(isGranted = true)
-            } else {
-                viewModel.setPermissionStatus(isGranted = false)
-            }
-        }
     }
 
     override fun onDestroyView() {
