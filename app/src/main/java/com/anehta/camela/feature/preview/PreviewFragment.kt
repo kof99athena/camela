@@ -44,14 +44,9 @@ class PreviewFragment : Fragment() {
     private val requestPermission = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        var allGranted = true
-        permissions.entries.forEach {
-            Log.d("PERMISSION DEBUG", "${it.key} = ${it.value}")
-            if (!it.value) {
-                allGranted = false
-            }
-        }
+        val allGranted = permissions.values.all { it }
         viewModel.setPermissionStatus(allGranted)
+        Log.d("PERMISSION DEBUG", "${permissions.keys} = ${permissions.values}")
     }
 
     override fun onCreateView(
@@ -65,22 +60,14 @@ class PreviewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        requestPermission.launch(REQUIRED_PERMISSIONS)
-
         viewModel.permissionRequest.observe(viewLifecycleOwner, Observer { requsetModel ->
             if (requsetModel.isGranted) {
                 Toast.makeText(context, R.string.granted, Toast.LENGTH_SHORT).show()
                 startCamera()
             } else {
-                requestPermissions(REQUIRED_PERMISSIONS, CAMERA_PERMISSION_REQUEST_CODE)
+                requestPermission.launch(REQUIRED_PERMISSIONS)
             }
         })
-
-        if (allPermissionsGranted()) {
-            viewModel.setPermissionStatus(isGranted = true)
-        } else {
-            requestPermissions(REQUIRED_PERMISSIONS, CAMERA_PERMISSION_REQUEST_CODE)
-        }
 
         surfaceHolder = binding.surface.holder
         surfaceHolder.addCallback(object : SurfaceHolder.Callback {
@@ -132,12 +119,6 @@ class PreviewFragment : Fragment() {
 
         }, ContextCompat.getMainExecutor(requireContext()))
         Log.d("CAMERA ACCESS", "startCamera()")
-    }
-
-    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-        context?.let { ctx ->
-            ContextCompat.checkSelfPermission(ctx, it)
-        } == PackageManager.PERMISSION_GRANTED
     }
 
     override fun onDestroyView() {
