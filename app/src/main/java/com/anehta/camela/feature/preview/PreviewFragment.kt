@@ -1,7 +1,6 @@
 package com.anehta.camela.feature.preview
 
 import android.Manifest
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -17,7 +16,6 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import com.anehta.camela.R
 import com.anehta.camela.databinding.FragmentPreviewBinding
 import com.anehta.camela.feature.preview.viewmodel.PreviewViewModel
@@ -31,8 +29,8 @@ class PreviewFragment : Fragment() {
     private val viewModel by activityViewModels<PreviewViewModel>()
     private lateinit var surfaceHolder: SurfaceHolder
 
-    private val CAMERA_PERMISSION_REQUEST_CODE = 10
-    private val REQUIRED_PERMISSIONS = mutableListOf(
+    //private val CAMERA_PERMISSION_REQUEST_CODE = 10
+    private val requiredPermission = mutableListOf(
         Manifest.permission.CAMERA,
         Manifest.permission.RECORD_AUDIO
     ).apply {
@@ -60,14 +58,14 @@ class PreviewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.permissionRequest.observe(viewLifecycleOwner, Observer { requsetModel ->
+        viewModel.permissionRequest.observe(viewLifecycleOwner) { requsetModel ->
             if (requsetModel.isGranted) {
                 Toast.makeText(context, R.string.granted, Toast.LENGTH_SHORT).show()
                 startCamera()
             } else {
-                requestPermission.launch(REQUIRED_PERMISSIONS)
+                requestPermission.launch(requiredPermission)
             }
-        })
+        }
 
         surfaceHolder = binding.surface.holder
         surfaceHolder.addCallback(object : SurfaceHolder.Callback {
