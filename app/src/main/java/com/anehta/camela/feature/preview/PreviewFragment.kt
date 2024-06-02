@@ -1,9 +1,11 @@
 package com.anehta.camela.feature.preview
 
 import android.Manifest
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.util.Size
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.SurfaceHolder
@@ -13,8 +15,12 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
+import androidx.camera.core.impl.ImageOutputConfig.RotationDegreesValue
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.rotationMatrix
 import androidx.fragment.app.activityViewModels
 import com.anehta.camela.R
 import com.anehta.camela.databinding.FragmentPreviewBinding
@@ -58,6 +64,8 @@ class PreviewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        surfaceHolder = binding.surface.holder
+
         viewModel.permissionRequest.observe(viewLifecycleOwner) { requsetModel ->
             if (requsetModel.isGranted) {
                 Toast.makeText(context, R.string.granted, Toast.LENGTH_SHORT).show()
@@ -67,26 +75,25 @@ class PreviewFragment : Fragment() {
             }
         }
 
-        surfaceHolder = binding.surface.holder
-        surfaceHolder.addCallback(object : SurfaceHolder.Callback {
-            override fun surfaceCreated(holder: SurfaceHolder) {
-                if (viewModel.permissionRequest.value?.isGranted == true) startCamera()
-                Log.d("CAMERA ACCESS", "surfaceCreated")
-            }
-
-            override fun surfaceChanged(
-                holder: SurfaceHolder,
-                format: Int,
-                width: Int,
-                height: Int
-            ) {
-                Log.d("CAMERA ACCESS", "surfaceChanged")
-            }
-
-            override fun surfaceDestroyed(holder: SurfaceHolder) {
-                Log.d("CAMERA ACCESS", "surfaceDestroyed")
-            }
-        })
+//        surfaceHolder.addCallback(object : SurfaceHolder.Callback {
+//            override fun surfaceCreated(holder: SurfaceHolder) {
+//                //if (viewModel.permissionRequest.value?.isGranted == true) startCamera()
+//                Log.d("CAMERA ACCESS", "surfaceCreated")
+//            }
+//
+//            override fun surfaceChanged(
+//                holder: SurfaceHolder,
+//                format: Int,
+//                width: Int,
+//                height: Int
+//            ) {
+//                Log.d("CAMERA ACCESS", "surfaceChanged")
+//            }
+//
+//            override fun surfaceDestroyed(holder: SurfaceHolder) {
+//                Log.d("CAMERA ACCESS", "surfaceDestroyed")
+//            }
+//        })
     }
 
     private fun startCamera() {
@@ -95,17 +102,36 @@ class PreviewFragment : Fragment() {
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
 
-            val preview = Preview.Builder().build().also {
-                it.setSurfaceProvider { request ->
-                    request.provideSurface(
-                        surfaceHolder.surface,
-                        ContextCompat.getMainExecutor(requireContext())
-                    ) { result ->
-                        // Handle surface request result if needed
+            Log.d("DEBUG PREVIEW", "get cameraProviderFuture intance")
+
+            val screenSize =
+                if (this.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) Size(
+                    720,
+                    1280
+                ) else Size(1280, 720)
+            val resolutionSelector = ResolutionSelector.Builder().setResolutionStrategy(
+                ResolutionStrategy(
+                    screenSize,
+                    ResolutionStrategy.FALLBACK_RULE_NONE
+                )
+            ).build()
+
+            Log.d("DEBUG PREVIEW", "initialized resolutionSelector")
+
+            val preview = Preview.Builder()
+                //.setResolutionSelector(resolutionSelector)
+                .build().also {
+                    it.setSurfaceProvider { request ->
+                        Log.d("DEBUG PREVIEW", "request SurfaceView")
+                        request.provideSurface(
+                            surfaceHolder.surface,
+                            ContextCompat.getMainExecutor(requireContext())
+                        ) { result ->
+                        }
+                        Log.d("DEBUG PREVIEW", "binding SurfaceView")
                     }
                 }
-            }
-
+            Log.d("DEBUG PREVIEW", "end")
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
             try {
@@ -116,7 +142,6 @@ class PreviewFragment : Fragment() {
             }
 
         }, ContextCompat.getMainExecutor(requireContext()))
-        Log.d("CAMERA ACCESS", "startCamera()")
     }
 
     override fun onDestroyView() {
