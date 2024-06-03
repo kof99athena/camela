@@ -71,7 +71,10 @@ class PreviewFragment : Fragment() {
         viewModel.permissionRequest.observe(viewLifecycleOwner) { requsetModel ->
             if (requsetModel.isGranted) {
                 Toast.makeText(context, R.string.granted, Toast.LENGTH_SHORT).show()
-                startCamera(surfaceHolder)
+                if (surfaceHolder.surface.isValid) {
+                    Log.d(TAG, "startCamera(surfaceHolder)")
+                    startCamera(surfaceHolder)
+                }
             } else {
                 requestPermission.launch(requiredPermission)
             }
@@ -79,8 +82,10 @@ class PreviewFragment : Fragment() {
 
         surfaceHolder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
-                if (viewModel.permissionRequest.value?.isGranted == true) startCamera(surfaceHolder)
                 Log.d("CAMERA ACCESS", "surfaceCreated")
+                if (viewModel.permissionRequest.value?.isGranted == true) {
+                    startCamera(holder)
+                }
             }
 
             override fun surfaceChanged(
@@ -125,8 +130,8 @@ class PreviewFragment : Fragment() {
                     it.setSurfaceProvider { request ->
                         Log.d(TAG, "request SurfaceView")
 
-                        if (surfaceHolder.surface.isValid){
-                            Log.d(TAG,"SurfaceHolder valid")
+                        if (surfaceHolder.surface.isValid) {
+                            Log.d(TAG, "SurfaceHolder valid")
                         } else {
                             Log.d(TAG, "SurfaceHolder is not valid")
                         }
