@@ -15,6 +15,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
+import androidx.camera.core.SurfaceRequest
 import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -24,6 +25,8 @@ import com.anehta.camela.R
 import com.anehta.camela.databinding.FragmentPreviewBinding
 import com.anehta.camela.feature.preview.viewmodel.PreviewViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 @AndroidEntryPoint
 class PreviewFragment : Fragment() {
@@ -136,12 +139,60 @@ class PreviewFragment : Fragment() {
                             Log.d(TAG, "SurfaceHolder is not valid")
                         }
 
-                        request.provideSurface(
-                            surfaceHolder.surface,
-                            ContextCompat.getMainExecutor(requireContext())
-                        ) { result ->
-                            Log.d(TAG, "Surface provided ${result.resultCode}")
+                        val executor = Executors.newSingleThreadScheduledExecutor()
+                        val future = executor.schedule({
+                            Log.e(TAG, "Surface request timed out")
+                        }, 5, TimeUnit.SECONDS)
+
+                        try {
+                            request.provideSurface(
+                                surfaceHolder.surface,
+                                ContextCompat.getMainExecutor(requireContext())
+                            ) { result ->
+                                future.cancel(false) // 타임아웃 취소
+                                Log.d(TAG, "Surface provided ${result.resultCode}")
+                                when (result.resultCode) {
+                                    SurfaceRequest.Result.RESULT_SURFACE_USED_SUCCESSFULLY -> {
+                                        Log.d(
+                                            TAG,
+                                            "Surface provided successfully: ${result.resultCode}"
+                                        )
+                                    }
+
+                                    else -> {
+                                        Log.d(
+                                            TAG,
+                                            "Surface provided with error: ${result.resultCode}"
+                                        )
+                                    }
+                                }
+                            }
+                            Log.d(TAG, "binding SurfaceView")
+                            Log.d(TAG, "===================")
+                        } catch (e: Exception) {
+                            future.cancel(false) // 타임아웃 취소
+                            Log.e(TAG, "Error providing surface", e)
                         }
+
+
+//                        request.provideSurface(
+//                            surfaceHolder.surface,
+//                            ContextCompat.getMainExecutor(requireContext())
+//                        ) { result ->
+//                            Log.d(TAG, "Surface provided ${result.resultCode}")
+//                            when (result.resultCode) {
+//                                SurfaceRequest.Result.RESULT_SURFACE_USED_SUCCESSFULLY -> {
+//                                    Log.d(
+//                                        TAG,
+//                                        "Surface provided successfully: ${result.resultCode}"
+//                                    )
+//                                }
+//
+//                                else -> {
+//                                    Log.d(TAG, "Surface provided with error: ${result.resultCode}")
+//                                }
+//                            }
+//                        }
                         Log.d(TAG, "binding SurfaceView")
                         Log.d(TAG, "===================")
                     }
@@ -151,11 +202,14 @@ class PreviewFragment : Fragment() {
 
             try {
                 cameraProvider.unbindAll()
+                Log.d(TAG, "Unbound all use cases")
                 cameraProvider.bindToLifecycle(this, cameraSelector, preview)
+                Log.d(TAG, "Bound to lifecycle")
+
             } catch (exc: Exception) {
                 exc.printStackTrace()
+                Log.e(TAG, "Failed to bind camera use cases", exc)
             }
-
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
