@@ -15,17 +15,18 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
-import androidx.camera.core.impl.ImageOutputConfig.RotationDegreesValue
+import androidx.camera.core.SurfaceRequest
 import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.rotationMatrix
 import androidx.fragment.app.activityViewModels
 import com.anehta.camela.R
 import com.anehta.camela.databinding.FragmentPreviewBinding
 import com.anehta.camela.feature.preview.viewmodel.PreviewViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 @AndroidEntryPoint
 class PreviewFragment : Fragment() {
@@ -34,6 +35,10 @@ class PreviewFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel by activityViewModels<PreviewViewModel>()
     private lateinit var surfaceHolder: SurfaceHolder
+
+    companion object {
+        const val TAG = "DEBUG PREVIEW"
+    }
 
     //private val CAMERA_PERMISSION_REQUEST_CODE = 10
     private val requiredPermission = mutableListOf(
@@ -69,40 +74,45 @@ class PreviewFragment : Fragment() {
         viewModel.permissionRequest.observe(viewLifecycleOwner) { requsetModel ->
             if (requsetModel.isGranted) {
                 Toast.makeText(context, R.string.granted, Toast.LENGTH_SHORT).show()
-                startCamera()
+                if (surfaceHolder.surface.isValid) {
+                    Log.d(TAG, "startCamera(surfaceHolder)")
+                    startCamera(surfaceHolder)
+                }
             } else {
                 requestPermission.launch(requiredPermission)
             }
         }
 
-//        surfaceHolder.addCallback(object : SurfaceHolder.Callback {
-//            override fun surfaceCreated(holder: SurfaceHolder) {
-//                //if (viewModel.permissionRequest.value?.isGranted == true) startCamera()
-//                Log.d("CAMERA ACCESS", "surfaceCreated")
-//            }
-//
-//            override fun surfaceChanged(
-//                holder: SurfaceHolder,
-//                format: Int,
-//                width: Int,
-//                height: Int
-//            ) {
-//                Log.d("CAMERA ACCESS", "surfaceChanged")
-//            }
-//
-//            override fun surfaceDestroyed(holder: SurfaceHolder) {
-//                Log.d("CAMERA ACCESS", "surfaceDestroyed")
-//            }
-//        })
+        surfaceHolder.addCallback(object : SurfaceHolder.Callback {
+            override fun surfaceCreated(holder: SurfaceHolder) {
+                Log.d("CAMERA ACCESS", "surfaceCreated")
+                if (viewModel.permissionRequest.value?.isGranted == true) {
+                    startCamera(holder)
+                }
+            }
+
+            override fun surfaceChanged(
+                holder: SurfaceHolder,
+                format: Int,
+                width: Int,
+                height: Int
+            ) {
+                Log.d("CAMERA ACCESS", "surfaceChanged")
+            }
+
+            override fun surfaceDestroyed(holder: SurfaceHolder) {
+                Log.d("CAMERA ACCESS", "surfaceDestroyed")
+            }
+        })
     }
 
-    private fun startCamera() {
+    private fun startCamera(surfaceHolder: SurfaceHolder) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
 
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
 
-            Log.d("DEBUG PREVIEW", "get cameraProviderFuture intance")
+            Log.d(TAG, "get cameraProviderFuture intance")
 
             val screenSize =
                 if (this.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) Size(
@@ -116,31 +126,90 @@ class PreviewFragment : Fragment() {
                 )
             ).build()
 
-            Log.d("DEBUG PREVIEW", "initialized resolutionSelector")
+            Log.d(TAG, "initialized resolutionSelector")
 
             val preview = Preview.Builder()
-                //.setResolutionSelector(resolutionSelector)
                 .build().also {
                     it.setSurfaceProvider { request ->
-                        Log.d("DEBUG PREVIEW", "request SurfaceView")
-                        request.provideSurface(
-                            surfaceHolder.surface,
-                            ContextCompat.getMainExecutor(requireContext())
-                        ) { result ->
+                        Log.d(TAG, "request SurfaceView")
+
+                        if (surfaceHolder.surface.isValid) {
+                            Log.d(TAG, "SurfaceHolder valid")
+                        } else {
+                            Log.d(TAG, "SurfaceHolder is not valid")
                         }
-                        Log.d("DEBUG PREVIEW", "binding SurfaceView")
+
+                        val executor = Executors.newSingleThreadScheduledExecutor()
+                        val future = executor.schedule({
+                            Log.e(TAG, "Surface request timed out")
+                        }, 5, TimeUnit.SECONDS)
+
+                        try {
+                            request.provideSurface(
+                                surfaceHolder.surface,
+                                ContextCompat.getMainExecutor(requireContext())
+                            ) { result ->
+                                future.cancel(false) // 타임아웃 취소
+                                Log.d(TAG, "Surface provided ${result.resultCode}")
+                                when (result.resultCode) {
+                                    SurfaceRequest.Result.RESULT_SURFACE_USED_SUCCESSFULLY -> {
+                                        Log.d(
+                                            TAG,
+                                            "Surface provided successfully: ${result.resultCode}"
+                                        )
+                                    }
+
+                                    else -> {
+                                        Log.d(
+                                            TAG,
+                                            "Surface provided with error: ${result.resultCode}"
+                                        )
+                                    }
+                                }
+                            }
+                            Log.d(TAG, "binding SurfaceView")
+                            Log.d(TAG, "===================")
+                        } catch (e: Exception) {
+                            future.cancel(false) // 타임아웃 취소
+                            Log.e(TAG, "Error providing surface", e)
+                        }
+
+
+//                        request.provideSurface(
+//                            surfaceHolder.surface,
+//                            ContextCompat.getMainExecutor(requireContext())
+//                        ) { result ->
+//                            Log.d(TAG, "Surface provided ${result.resultCode}")
+//                            when (result.resultCode) {
+//                                SurfaceRequest.Result.RESULT_SURFACE_USED_SUCCESSFULLY -> {
+//                                    Log.d(
+//                                        TAG,
+//                                        "Surface provided successfully: ${result.resultCode}"
+//                                    )
+//                                }
+//
+//                                else -> {
+//                                    Log.d(TAG, "Surface provided with error: ${result.resultCode}")
+//                                }
+//                            }
+//                        }
+                        Log.d(TAG, "binding SurfaceView")
+                        Log.d(TAG, "===================")
                     }
                 }
-            Log.d("DEBUG PREVIEW", "end")
+            Log.d(TAG, "End of Configuration")
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
             try {
                 cameraProvider.unbindAll()
+                Log.d(TAG, "Unbound all use cases")
                 cameraProvider.bindToLifecycle(this, cameraSelector, preview)
+                Log.d(TAG, "Bound to lifecycle")
+
             } catch (exc: Exception) {
                 exc.printStackTrace()
+                Log.e(TAG, "Failed to bind camera use cases", exc)
             }
-
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
