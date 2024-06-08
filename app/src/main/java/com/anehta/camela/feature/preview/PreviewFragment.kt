@@ -1,12 +1,9 @@
 package com.anehta.camela.feature.preview
 
 import android.Manifest
-import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.util.Size
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.SurfaceHolder
 import android.view.View
@@ -16,21 +13,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
 import androidx.camera.core.SurfaceRequest
-import androidx.camera.core.resolutionselector.ResolutionSelector
-import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.anehta.camela.R
 import com.anehta.camela.databinding.FragmentPreviewBinding
 import com.anehta.camela.feature.preview.viewmodel.PreviewViewModel
-import com.anehta.camela.utils.ScreenUtil
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.handleCoroutineException
-import kotlinx.coroutines.launch
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 @AndroidEntryPoint
 class PreviewFragment : Fragment() {
@@ -79,7 +69,6 @@ class PreviewFragment : Fragment() {
                 Toast.makeText(context, R.string.granted, Toast.LENGTH_SHORT).show()
                 if (surfaceHolder.surface.isValid) {
                     startCamera(surfaceHolder)
-                    Log.d(TAG, "startCamera(surfaceHolder)")
                 }
             } else {
                 requestPermission.launch(requiredPermission)
@@ -114,37 +103,9 @@ class PreviewFragment : Fragment() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
-            Log.d(TAG, "get cameraProviderFuture intance")
-
-            ScreenUtil.getViewSize(view) { width, height ->
-                Log.d("screen size", "width: ${width}, height: ${height}")
-            }
-
-//            val screenSize =
-//                if (this.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) Size(
-//                    width,
-//                    height
-//                ) else Size(height, width)
-//            val resolutionSelector = ResolutionSelector.Builder().setResolutionStrategy(
-//                ResolutionStrategy(
-//                    screenSize,
-//                    ResolutionStrategy.FALLBACK_RULE_NONE
-//                )
-//            ).build()
-
-            Log.d(TAG, "initialized resolutionSelector")
-
-            val scheduledExecutor = Executors.newSingleThreadScheduledExecutor()
-            val future = scheduledExecutor.schedule({
-                Log.e(TAG, "Surface request timed out")
-            }, 5, TimeUnit.SECONDS)
-
             val preview = Preview.Builder()
-                //.setResolutionSelector(resolutionSelector)
                 .build().also {
                     it.setSurfaceProvider { request ->
-                        Log.d(TAG, "request SurfaceView")
-
                         if (surfaceHolder.surface.isValid) {
                             Log.d(TAG, "SurfaceHolder valid")
                         } else {
@@ -156,7 +117,6 @@ class PreviewFragment : Fragment() {
                                 surfaceHolder.surface,
                                 ContextCompat.getMainExecutor(requireContext())
                             ) { result ->
-                                future.cancel(false) // 타임아웃 취소
                                 Log.d(TAG, "Surface provided ${result.resultCode}")
                                 when (result.resultCode) {
                                     SurfaceRequest.Result.RESULT_SURFACE_USED_SUCCESSFULLY -> {
@@ -175,22 +135,16 @@ class PreviewFragment : Fragment() {
                                 }
                             }
                         } catch (e: Exception) {
-                            future.cancel(false) // 타임아웃 취소
                             Log.e(TAG, "Error providing surface", e)
                         }
                     }
                 }
-            Log.d(TAG, "End of Configuration")
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
             try {
                 cameraProvider.unbindAll()
-                Log.d(TAG, "Unbound all use cases")
                 cameraProvider.bindToLifecycle(this, cameraSelector, preview)
-                Log.d(TAG, "Bound to lifecycle")
             } catch (exc: Exception) {
                 exc.printStackTrace()
-                Log.e(TAG, "Failed to bind camera use cases", exc)
             }
         }, ContextCompat.getMainExecutor(requireContext()))
     }
