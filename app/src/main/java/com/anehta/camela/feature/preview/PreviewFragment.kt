@@ -72,11 +72,6 @@ class PreviewFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        ScreenUtil.getViewSize(view) { width, height ->
-            Log.d("screen size", "width: ${width}, height: ${height}")
-        }
-
         surfaceHolder = binding.surface.holder
 
         viewModel.permissionRequest.observe(viewLifecycleOwner) { requsetModel ->
@@ -121,6 +116,9 @@ class PreviewFragment : Fragment() {
             val cameraProvider = cameraProviderFuture.get()
             Log.d(TAG, "get cameraProviderFuture intance")
 
+            ScreenUtil.getViewSize(view) { width, height ->
+                Log.d("screen size", "width: ${width}, height: ${height}")
+            }
 
 //            val screenSize =
 //                if (this.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) Size(
@@ -133,7 +131,6 @@ class PreviewFragment : Fragment() {
 //                    ResolutionStrategy.FALLBACK_RULE_NONE
 //                )
 //            ).build()
-
 
             Log.d(TAG, "initialized resolutionSelector")
 
