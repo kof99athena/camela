@@ -4,7 +4,6 @@ import android.Manifest
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.SurfaceHolder
 import android.view.View
@@ -13,8 +12,11 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
+import androidx.camera.core.SurfaceRequest
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.anehta.camela.R
 import com.anehta.camela.databinding.FragmentPreviewBinding
@@ -28,6 +30,10 @@ class PreviewFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel by activityViewModels<PreviewViewModel>()
     private lateinit var surfaceHolder: SurfaceHolder
+
+    companion object {
+        const val TAG = "DEBUG PREVIEW"
+    }
 
     //private val CAMERA_PERMISSION_REQUEST_CODE = 10
     private val requiredPermission = mutableListOf(
@@ -51,27 +57,35 @@ class PreviewFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentPreviewBinding.inflate(inflater, container, false)
+        _binding = DataBindingUtil.inflate(inflater, R.layout.fragment_preview, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        surfaceHolder = binding.surface.holder
+
+        binding.viewmodel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner
 
         viewModel.permissionRequest.observe(viewLifecycleOwner) { requsetModel ->
             if (requsetModel.isGranted) {
                 Toast.makeText(context, R.string.granted, Toast.LENGTH_SHORT).show()
-                startCamera()
+                if (surfaceHolder.surface.isValid) {
+                    startCamera(surfaceHolder)
+                }
             } else {
                 requestPermission.launch(requiredPermission)
             }
         }
 
-        surfaceHolder = binding.surface.holder
         surfaceHolder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
-                if (viewModel.permissionRequest.value?.isGranted == true) startCamera()
-                Log.d("CAMERA ACCESS", "surfaceCreated")
+                Log.d(TAG, "surfaceCreated")
+                if (viewModel.permissionRequest.value?.isGranted == true) {
+                    startCamera(holder)
+                    Log.d(TAG, "startCamera(holder)")
+                }
             }
 
             override fun surfaceChanged(
@@ -80,43 +94,63 @@ class PreviewFragment : Fragment() {
                 width: Int,
                 height: Int
             ) {
-                Log.d("CAMERA ACCESS", "surfaceChanged")
+                Log.d(TAG, "surfaceChanged")
             }
 
             override fun surfaceDestroyed(holder: SurfaceHolder) {
-                Log.d("CAMERA ACCESS", "surfaceDestroyed")
+                Log.d(TAG, "surfaceChanged")
             }
         })
     }
 
-    private fun startCamera() {
+    private fun startCamera(surfaceHolder: SurfaceHolder) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
-
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
+            val preview = Preview.Builder()
+                .build().also {
+                    it.setSurfaceProvider { request ->
+                        if (surfaceHolder.surface.isValid) {
+                            Log.d(TAG, "SurfaceHolder valid")
+                        } else {
+                            Log.d(TAG, "SurfaceHolder is not valid")
+                        }
 
-            val preview = Preview.Builder().build().also {
-                it.setSurfaceProvider { request ->
-                    request.provideSurface(
-                        surfaceHolder.surface,
-                        ContextCompat.getMainExecutor(requireContext())
-                    ) { result ->
-                        // Handle surface request result if needed
+                        try {
+                            request.provideSurface(
+                                surfaceHolder.surface,
+                                ContextCompat.getMainExecutor(requireContext())
+                            ) { result ->
+                                Log.d(TAG, "Surface provided ${result.resultCode}")
+                                when (result.resultCode) {
+                                    SurfaceRequest.Result.RESULT_SURFACE_USED_SUCCESSFULLY -> {
+                                        Log.d(
+                                            TAG,
+                                            "Surface provided successfully: ${result.resultCode}"
+                                        )
+                                    }
+
+                                    else -> {
+                                        Log.d(
+                                            TAG,
+                                            "Surface provided with error: ${result.resultCode}"
+                                        )
+                                    }
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error providing surface", e)
+                        }
                     }
                 }
-            }
-
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
             try {
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(this, cameraSelector, preview)
             } catch (exc: Exception) {
                 exc.printStackTrace()
             }
-
         }, ContextCompat.getMainExecutor(requireContext()))
-        Log.d("CAMERA ACCESS", "startCamera()")
     }
 
     override fun onDestroyView() {
