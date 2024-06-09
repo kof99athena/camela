@@ -21,7 +21,6 @@ import androidx.fragment.app.activityViewModels
 import com.anehta.camela.R
 import com.anehta.camela.databinding.FragmentPreviewBinding
 import com.anehta.camela.feature.preview.viewmodel.PreviewViewModel
-import com.anehta.camela.utils.ScreenUtil
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

@@ -56,13 +56,20 @@
                 android:id="@+id/timer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:timerToText="@{viewmodel.timer}"
                 android:textColor="@color/white"
-                android:textSize="@dimen/font_size_large" />
-
+                android:textSize="@dimen/font_size_large"
+                app:timerToText="@{viewmodel.timer}" />
 
         </LinearLayout>
 
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/margin_large"
+            android:background="@drawable/img_capture"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

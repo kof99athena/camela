@@ -53,7 +53,7 @@ class PreviewViewModel @Inject constructor(private val interactor: PreviewIntera
         _preview_zoom.value = zoom
     }
 
-    fun setPreviewTimer(timer: ScreenUtil.Timer ) {
+    fun setPreviewTimer(timer: ScreenUtil.Timer) {
         _preview_timer.value = timer
     }
 }

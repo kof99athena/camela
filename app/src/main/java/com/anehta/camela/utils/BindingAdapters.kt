@@ -3,8 +3,6 @@ package com.anehta.camela.utils
 import android.util.Log
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
-import androidx.lifecycle.LiveData
-import kotlinx.coroutines.channels.ticker
 
 @BindingAdapter("app:ratioToText")
 fun setRatioToText(view: TextView, ratio: ScreenUtil.Ratio?) {
