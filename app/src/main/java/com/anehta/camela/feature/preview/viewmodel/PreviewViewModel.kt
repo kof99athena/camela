@@ -21,9 +21,19 @@ class PreviewViewModel @Inject constructor(private val interactor: PreviewIntera
     val ratio: LiveData<ScreenUtil.Ratio>
         get() = _preview_ratio
 
+    private val _preview_zoom = MutableLiveData<ScreenUtil.Zoom>()
+    val zoom: LiveData<ScreenUtil.Zoom>
+        get() = _preview_zoom
+
+    private val _preview_timer = MutableLiveData<ScreenUtil.Timer>()
+    val timer: LiveData<ScreenUtil.Timer>
+        get() = _preview_timer
+
     init {
         _permission_request.value = PermissionRequest(false)
         _preview_ratio.value = ScreenUtil.Ratio.Ratio_Full
+        _preview_zoom.value = ScreenUtil.Zoom.Zoom_1x
+        _preview_timer.value = ScreenUtil.Timer.Timer_0
     }
 
     fun getPermissionStatus() {
@@ -37,5 +47,13 @@ class PreviewViewModel @Inject constructor(private val interactor: PreviewIntera
 
     fun setPreviewRatio(ratio: ScreenUtil.Ratio) {
         _preview_ratio.value = ratio
+    }
+
+    fun setPreviewZoom(zoom: ScreenUtil.Zoom) {
+        _preview_zoom.value = zoom
+    }
+
+    fun setPreviewTimer(timer: ScreenUtil.Timer ) {
+        _preview_timer.value = timer
     }
 }

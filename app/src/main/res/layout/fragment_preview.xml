@@ -41,24 +41,25 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/white"
-                app:ratioToText="@{viewmodel.ratio}"
-                android:textSize="@dimen/font_size_large" />
-
-            <TextView
-                android:id="@+id/timer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:hint="0s"
-                android:textColor="@color/white"
-                android:textSize="@dimen/font_size_large" />
+                android:textSize="@dimen/font_size_large"
+                app:ratioToText="@{viewmodel.ratio}" />
 
             <TextView
                 android:id="@+id/zoom"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="1x"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_large"
+                app:zoomToText="@{viewmodel.zoom}" />
+
+            <TextView
+                android:id="@+id/timer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:timerToText="@{viewmodel.timer}"
                 android:textColor="@color/white"
                 android:textSize="@dimen/font_size_large" />
+
 
         </LinearLayout>
 
