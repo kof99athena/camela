@@ -6,6 +6,7 @@ import javax.inject.Inject
 
 class PreviewRepositoryImpl @Inject constructor() : PreviewRepository {
     private var permissionGranted: Boolean = false
+    private var previewRatio: String = "Full"
 
     override fun getPermissionStatus(): PermissionRequest {
         return PermissionRequest(permissionGranted)

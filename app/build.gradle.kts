@@ -37,16 +37,21 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        dataBinding = true
     }
 }
 
 dependencies {
-    val fragment_version = "1.7.0"
-    val camerax_version = "1.4.0-alpha05"
+    val fragment_version = "1.7.1"
+    val camerax_version = "1.4.0-beta01"
     val hilt_version = "2.50"
+    val window_version = "1.3.0"
 
     // Kotlin - Fragment
     implementation("androidx.fragment:fragment-ktx:$fragment_version")
+
+    //window
+    implementation("androidx.window:window:${window_version}")
 
     //hilt
     implementation("com.google.dagger:hilt-android:${hilt_version}")
