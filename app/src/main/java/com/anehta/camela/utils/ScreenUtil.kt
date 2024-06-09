@@ -6,24 +6,11 @@ import android.view.ViewTreeObserver
 import androidx.window.layout.WindowMetricsCalculator
 
 object ScreenUtil {
-    enum class PreviewRatio(val width: Int, val height: Int) {
-        RATIO_1_1(1, 1),
-        RATIO_3_4(3, 4),
-        RATIO_9_16(9, 16),
-        FULL_SIZE(-1, -1);
-
-        override fun toString(): String {
-            return if (this == FULL_SIZE) "Full Size" else "$width:$height"
-        }
-    }
-
-    fun getPreviewRatio(ratio: PreviewRatio): String {
-        return when (ratio) {
-            PreviewRatio.RATIO_1_1 -> "1:1"
-            PreviewRatio.RATIO_3_4 -> "3:4"
-            PreviewRatio.RATIO_9_16 -> "9:16"
-            PreviewRatio.FULL_SIZE -> "Full"
-        }
+    enum class PreviewRatio {
+        Ratio_1_1,
+        Ratio_3_4,
+        Ratio_9_16,
+        Ratio_Full;
     }
 
     fun computeWindowSizeClasses(context: Context): Pair<Int, Int> {

@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.anehta.camela.feature.preview.interactors.PreviewInteractor
 import com.anehta.camela.models.requests.PermissionRequest
+import com.anehta.camela.utils.ScreenUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -16,8 +17,13 @@ class PreviewViewModel @Inject constructor(private val interactor: PreviewIntera
     val permissionRequest: LiveData<PermissionRequest>
         get() = _permission_request
 
+    private val _preview_ratio = MutableLiveData<ScreenUtil.PreviewRatio>()
+    val previewRatio: LiveData<ScreenUtil.PreviewRatio>
+        get() = _preview_ratio
+
     init {
         _permission_request.value = PermissionRequest(false)
+        _preview_ratio.value = ScreenUtil.PreviewRatio.Ratio_Full
     }
 
     fun getPermissionStatus() {
@@ -27,5 +33,9 @@ class PreviewViewModel @Inject constructor(private val interactor: PreviewIntera
 
     fun setPermissionStatus(isGranted: Boolean) {
         _permission_request.value = PermissionRequest(isGranted)
+    }
+
+    fun setPreviewRatio(ratio: ScreenUtil.PreviewRatio) {
+        _preview_ratio.value = ratio
     }
 }

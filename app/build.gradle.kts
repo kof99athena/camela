@@ -42,8 +42,8 @@ android {
 }
 
 dependencies {
-    val fragment_version = "1.7.0"
-    val camerax_version = "1.4.0-alpha05"
+    val fragment_version = "1.7.1"
+    val camerax_version = "1.4.0-beta01"
     val hilt_version = "2.50"
     val window_version = "1.3.0"
 

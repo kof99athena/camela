@@ -64,6 +64,13 @@ class PreviewFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         surfaceHolder = binding.surface.holder
 
+        binding.ratio.setOnClickListener {
+            Toast.makeText(context, "ratio", Toast.LENGTH_SHORT).show()
+            viewModel.previewRatio.observe(viewLifecycleOwner) { ratio ->
+
+            }
+        }
+
         viewModel.permissionRequest.observe(viewLifecycleOwner) { requsetModel ->
             if (requsetModel.isGranted) {
                 Toast.makeText(context, R.string.granted, Toast.LENGTH_SHORT).show()
@@ -74,6 +81,8 @@ class PreviewFragment : Fragment() {
                 requestPermission.launch(requiredPermission)
             }
         }
+
+
 
         surfaceHolder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
