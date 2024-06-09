@@ -15,11 +15,13 @@ import androidx.camera.core.Preview
 import androidx.camera.core.SurfaceRequest
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.anehta.camela.R
 import com.anehta.camela.databinding.FragmentPreviewBinding
 import com.anehta.camela.feature.preview.viewmodel.PreviewViewModel
+import com.anehta.camela.utils.ScreenUtil
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -56,7 +58,7 @@ class PreviewFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentPreviewBinding.inflate(inflater, container, false)
+        _binding = DataBindingUtil.inflate(inflater, R.layout.fragment_preview, container, false)
         return binding.root
     }
 
@@ -64,12 +66,8 @@ class PreviewFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         surfaceHolder = binding.surface.holder
 
-        binding.ratio.setOnClickListener {
-            Toast.makeText(context, "ratio", Toast.LENGTH_SHORT).show()
-            viewModel.previewRatio.observe(viewLifecycleOwner) { ratio ->
-
-            }
-        }
+        binding.viewmodel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner
 
         viewModel.permissionRequest.observe(viewLifecycleOwner) { requsetModel ->
             if (requsetModel.isGranted) {
@@ -81,8 +79,6 @@ class PreviewFragment : Fragment() {
                 requestPermission.launch(requiredPermission)
             }
         }
-
-
 
         surfaceHolder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {

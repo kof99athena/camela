@@ -6,11 +6,23 @@ import android.view.ViewTreeObserver
 import androidx.window.layout.WindowMetricsCalculator
 
 object ScreenUtil {
-    enum class PreviewRatio {
+    enum class Ratio {
         Ratio_1_1,
         Ratio_3_4,
         Ratio_9_16,
         Ratio_Full;
+    }
+
+    enum class Zoom {
+        Zoom_0_5x,
+        Zoom_1x,
+        Zoom_2x;
+    }
+
+    enum class Timer {
+        Timer_0,
+        Timer_3,
+        Timer_5;
     }
 
     fun computeWindowSizeClasses(context: Context): Pair<Int, Int> {
