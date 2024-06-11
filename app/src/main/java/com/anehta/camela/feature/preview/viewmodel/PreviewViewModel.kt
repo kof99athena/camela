@@ -12,6 +12,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PreviewViewModel @Inject constructor(private val interactor: PreviewInteractor) :
     ViewModel() {
+    private var currentIndex = 0
 
     private val _permission_request = MutableLiveData<PermissionRequest>()
     val permissionRequest: LiveData<PermissionRequest>
@@ -20,40 +21,46 @@ class PreviewViewModel @Inject constructor(private val interactor: PreviewIntera
     private val _preview_ratio = MutableLiveData<ScreenUtil.Ratio>()
     val ratio: LiveData<ScreenUtil.Ratio>
         get() = _preview_ratio
+    private val ratios = ScreenUtil.Ratio.values()
 
     private val _preview_zoom = MutableLiveData<ScreenUtil.Zoom>()
     val zoom: LiveData<ScreenUtil.Zoom>
         get() = _preview_zoom
+    private val zooms = ScreenUtil.Zoom.values()
 
     private val _preview_timer = MutableLiveData<ScreenUtil.Timer>()
     val timer: LiveData<ScreenUtil.Timer>
         get() = _preview_timer
+    private val timers = ScreenUtil.Timer.values()
 
     init {
         _permission_request.value = PermissionRequest(false)
-        _preview_ratio.value = ScreenUtil.Ratio.Ratio_Full
-        _preview_zoom.value = ScreenUtil.Zoom.Zoom_1x
-        _preview_timer.value = ScreenUtil.Timer.Timer_0
+        _preview_ratio.value = ratios[currentIndex]
+        _preview_zoom.value = zooms[currentIndex]
+        _preview_timer.value = timers[currentIndex]
     }
 
-    fun getPermissionStatus() {
-        val permissionStatus = interactor.getPermissionStatus()
-        _permission_request.value = permissionStatus
-    }
+//    fun getPermissionStatus() {
+//        val permissionStatus = interactor.getPermissionStatus()
+//        _permission_request.value = permissionStatus
+//    }
 
     fun setPermissionStatus(isGranted: Boolean) {
         _permission_request.value = PermissionRequest(isGranted)
     }
 
-    fun setPreviewRatio(ratio: ScreenUtil.Ratio) {
-        _preview_ratio.value = ratio
+    fun setPreviewRatio() {
+        currentIndex = (currentIndex + 1) % ratios.size
+        _preview_ratio.value = ratios[currentIndex]
     }
 
-    fun setPreviewZoom(zoom: ScreenUtil.Zoom) {
-        _preview_zoom.value = zoom
+    fun setPreviewZoom() {
+        currentIndex = (currentIndex + 1) % zooms.size
+        _preview_zoom.value = zooms[currentIndex]
     }
 
-    fun setPreviewTimer(timer: ScreenUtil.Timer) {
-        _preview_timer.value = timer
+    fun setPreviewTimer() {
+        currentIndex = (currentIndex + 1) % timers.size
+        _preview_timer.value = timers[currentIndex]
     }
 }
