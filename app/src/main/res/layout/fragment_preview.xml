@@ -40,6 +40,7 @@
                 android:id="@+id/ratio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:onClick="@{() -> viewmodel.setPreviewRatio()}"
                 android:textColor="@color/white"
                 android:textSize="@dimen/font_size_large"
                 app:ratioToText="@{viewmodel.ratio}" />
@@ -48,6 +49,7 @@
                 android:id="@+id/zoom"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:onClick="@{() -> viewmodel.setPreviewZoom()}"
                 android:textColor="@color/white"
                 android:textSize="@dimen/font_size_large"
                 app:zoomToText="@{viewmodel.zoom}" />
@@ -56,6 +58,7 @@
                 android:id="@+id/timer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:onClick="@{() -> viewmodel.setPreviewTimer()}"
                 android:textColor="@color/white"
                 android:textSize="@dimen/font_size_large"
                 app:timerToText="@{viewmodel.timer}" />
