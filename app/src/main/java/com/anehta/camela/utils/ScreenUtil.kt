@@ -6,11 +6,11 @@ import android.view.ViewTreeObserver
 import androidx.window.layout.WindowMetricsCalculator
 
 object ScreenUtil {
-    enum class Ratio {
-        Ratio_1_1,
-        Ratio_3_4,
-        Ratio_9_16,
-        Ratio_Full;
+    enum class Ratio(val ratioString: String) {
+        Ratio_1_1("1:1"),
+        Ratio_3_4("3:4"),
+        Ratio_9_16("9:16"),
+        Ratio_Full("0:0");
     }
 
     enum class Zoom {

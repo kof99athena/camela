@@ -14,53 +14,53 @@ class PreviewViewModel @Inject constructor(private val interactor: PreviewIntera
     ViewModel() {
     private var currentIndex = 0
 
-    private val _permission_request = MutableLiveData<PermissionRequest>()
+    private val requestMutableLiveData = MutableLiveData<PermissionRequest>()
     val permissionRequest: LiveData<PermissionRequest>
-        get() = _permission_request
+        get() = requestMutableLiveData
 
-    private val _preview_ratio = MutableLiveData<ScreenUtil.Ratio>()
+    private val ratioMutableLiveData = MutableLiveData<ScreenUtil.Ratio>()
     val ratio: LiveData<ScreenUtil.Ratio>
-        get() = _preview_ratio
-    private val ratios = ScreenUtil.Ratio.values()
+        get() = ratioMutableLiveData
+    private val ratios = ScreenUtil.Ratio.entries.toTypedArray()
 
-    private val _preview_zoom = MutableLiveData<ScreenUtil.Zoom>()
+    private val zoomMutableLiveData = MutableLiveData<ScreenUtil.Zoom>()
     val zoom: LiveData<ScreenUtil.Zoom>
-        get() = _preview_zoom
-    private val zooms = ScreenUtil.Zoom.values()
+        get() = zoomMutableLiveData
+    private val zooms = ScreenUtil.Zoom.entries.toTypedArray()
 
-    private val _preview_timer = MutableLiveData<ScreenUtil.Timer>()
+    private val timerMutableLiveData = MutableLiveData<ScreenUtil.Timer>()
     val timer: LiveData<ScreenUtil.Timer>
-        get() = _preview_timer
-    private val timers = ScreenUtil.Timer.values()
+        get() = timerMutableLiveData
+    private val timers = ScreenUtil.Timer.entries.toTypedArray()
 
     init {
-        _permission_request.value = PermissionRequest(false)
-        _preview_ratio.value = ratios[currentIndex]
-        _preview_zoom.value = zooms[currentIndex]
-        _preview_timer.value = timers[currentIndex]
+        requestMutableLiveData.value = PermissionRequest(false)
+        ratioMutableLiveData.value = ratios[currentIndex]
+        zoomMutableLiveData.value = zooms[currentIndex]
+        timerMutableLiveData.value = timers[currentIndex]
     }
 
-//    fun getPermissionStatus() {
-//        val permissionStatus = interactor.getPermissionStatus()
-//        _permission_request.value = permissionStatus
-//    }
+    fun getPermissionStatus() {
+        val permissionStatus = interactor.getPermissionStatus()
+        requestMutableLiveData.value = permissionStatus
+    }
 
     fun setPermissionStatus(isGranted: Boolean) {
-        _permission_request.value = PermissionRequest(isGranted)
+        requestMutableLiveData.value = PermissionRequest(isGranted)
     }
 
     fun setPreviewRatio() {
         currentIndex = (currentIndex + 1) % ratios.size
-        _preview_ratio.value = ratios[currentIndex]
+        ratioMutableLiveData.value = ratios[currentIndex]
     }
 
     fun setPreviewZoom() {
         currentIndex = (currentIndex + 1) % zooms.size
-        _preview_zoom.value = zooms[currentIndex]
+        zoomMutableLiveData.value = zooms[currentIndex]
     }
 
     fun setPreviewTimer() {
         currentIndex = (currentIndex + 1) % timers.size
-        _preview_timer.value = timers[currentIndex]
+        timerMutableLiveData.value = timers[currentIndex]
     }
 }
