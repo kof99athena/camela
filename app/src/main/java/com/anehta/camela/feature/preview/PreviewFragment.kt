@@ -1,8 +1,12 @@
 package com.anehta.camela.feature.preview
 
 import android.Manifest
+import android.content.ContentValues
+import android.media.Image
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.SurfaceHolder
@@ -11,6 +15,8 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.core.SurfaceRequest
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -24,6 +30,9 @@ import com.anehta.camela.databinding.FragmentPreviewBinding
 import com.anehta.camela.feature.preview.viewmodel.PreviewViewModel
 import com.anehta.camela.utils.ScreenUtil
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @AndroidEntryPoint
 class PreviewFragment : Fragment() {
@@ -32,15 +41,16 @@ class PreviewFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel by activityViewModels<PreviewViewModel>()
     private lateinit var surfaceHolder: SurfaceHolder
+    private var imageCapture: ImageCapture? = null
 
     companion object {
-        const val TAG = "DEBUG PREVIEW"
+        private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
     }
 
     //private val CAMERA_PERMISSION_REQUEST_CODE = 10
     private val requiredPermission = mutableListOf(
         Manifest.permission.CAMERA,
-        Manifest.permission.RECORD_AUDIO
+        Manifest.permission.RECORD_AUDIO,
     ).apply {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
             add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -67,6 +77,10 @@ class PreviewFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         surfaceHolder = binding.surface.holder
 
+        binding.capture.setOnClickListener {
+            takePicture()
+        }
+
         binding.viewmodel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
 
@@ -87,10 +101,8 @@ class PreviewFragment : Fragment() {
 
         surfaceHolder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
-                Log.d(TAG, "surfaceCreated")
                 if (viewModel.permissionRequest.value?.isGranted == true) {
                     startCamera(holder)
-                    Log.d(TAG, "startCamera(holder)")
                 }
             }
 
@@ -100,11 +112,9 @@ class PreviewFragment : Fragment() {
                 width: Int,
                 height: Int
             ) {
-                Log.d(TAG, "surfaceChanged")
             }
 
             override fun surfaceDestroyed(holder: SurfaceHolder) {
-                Log.d(TAG, "surfaceChanged")
             }
         })
     }
@@ -124,9 +134,7 @@ class PreviewFragment : Fragment() {
                 .build().also {
                     it.setSurfaceProvider { request ->
                         if (surfaceHolder.surface.isValid) {
-                            Log.d(TAG, "SurfaceHolder valid")
                         } else {
-                            Log.d(TAG, "SurfaceHolder is not valid")
                         }
 
                         try {
@@ -134,36 +142,63 @@ class PreviewFragment : Fragment() {
                                 surfaceHolder.surface,
                                 ContextCompat.getMainExecutor(requireContext())
                             ) { result ->
-                                Log.d(TAG, "Surface provided ${result.resultCode}")
                                 when (result.resultCode) {
                                     SurfaceRequest.Result.RESULT_SURFACE_USED_SUCCESSFULLY -> {
-                                        Log.d(
-                                            TAG,
-                                            "Surface provided successfully: ${result.resultCode}"
-                                        )
                                     }
 
                                     else -> {
-                                        Log.d(
-                                            TAG,
-                                            "Surface provided with error: ${result.resultCode}"
-                                        )
                                     }
                                 }
                             }
                         } catch (e: Exception) {
-                            Log.e(TAG, "Error providing surface", e)
                         }
                     }
                 }
+
+            imageCapture = ImageCapture.Builder().build()
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
             try {
                 cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(this, cameraSelector, preview)
+                cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture)
+
             } catch (exc: Exception) {
                 exc.printStackTrace()
             }
         }, ContextCompat.getMainExecutor(requireContext()))
+    }
+
+    private fun takePicture() {
+        val fileName =
+            SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA).format(System.currentTimeMillis())
+        val contentValue = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(MediaStore.MediaColumns.RELATIVE_PATH, "Pictures/Camela")
+            }
+        }
+
+        val outputOptions = ImageCapture.OutputFileOptions.Builder(
+            requireContext().contentResolver,
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            contentValue
+        ).build()
+
+        imageCapture?.takePicture(
+            outputOptions,
+            ContextCompat.getMainExecutor(requireContext()),
+            object : ImageCapture.OnImageSavedCallback {
+                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                    val saveUri = outputFileResults.savedUri ?: Uri.EMPTY
+                    val msg = "take a photo: $saveUri"
+                    Toast.makeText(requireContext(), "click", Toast.LENGTH_SHORT).show()
+                }
+
+                override fun onError(exception: ImageCaptureException) {
+                    Log.i("Camera Capture", "onError: ${exception.message}", exception)
+                }
+            }
+        )
     }
 
     override fun onDestroyView() {
