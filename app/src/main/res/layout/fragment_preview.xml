@@ -36,13 +36,11 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
+            <ImageView
                 android:id="@+id/ratio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="@{() -> viewmodel.setPreviewRatio()}"
-                android:textColor="@color/white"
-                android:textSize="@dimen/font_size_large"
                 app:ratioToText="@{viewmodel.ratio}" />
 
             <TextView
