@@ -14,6 +14,7 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
 import androidx.camera.core.SurfaceRequest
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -21,6 +22,7 @@ import androidx.fragment.app.activityViewModels
 import com.anehta.camela.R
 import com.anehta.camela.databinding.FragmentPreviewBinding
 import com.anehta.camela.feature.preview.viewmodel.PreviewViewModel
+import com.anehta.camela.utils.ScreenUtil
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -79,6 +81,10 @@ class PreviewFragment : Fragment() {
             }
         }
 
+        viewModel.ratio.observe(viewLifecycleOwner) { ratio ->
+            setViewRatio(ratio)
+        }
+
         surfaceHolder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
                 Log.d(TAG, "surfaceCreated")
@@ -101,6 +107,13 @@ class PreviewFragment : Fragment() {
                 Log.d(TAG, "surfaceChanged")
             }
         })
+    }
+
+    private fun setViewRatio(ratio: ScreenUtil.Ratio) {
+        val layoutParams = binding.surface.layoutParams as ConstraintLayout.LayoutParams
+        layoutParams.dimensionRatio = ratio.ratioString
+        binding.surface.layoutParams = layoutParams
+        binding.surface.requestLayout()
     }
 
     private fun startCamera(surfaceHolder: SurfaceHolder) {
